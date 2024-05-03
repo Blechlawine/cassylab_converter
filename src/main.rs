@@ -45,7 +45,7 @@ fn main() {
                 }
             })
     });
-    dbg!(&files);
+    //dbg!(&files);
     for (index, file) in files.iter().enumerate() {
         fs::write(format!("{}.csv", index), String::from(file)).unwrap();
     }
