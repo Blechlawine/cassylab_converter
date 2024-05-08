@@ -1,12 +1,30 @@
-use std::fs;
+use std::{fs, path::PathBuf};
 
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 
+#[derive(clap::Parser)]
+struct Cli {
+    /// File to read from (must be xml)
+    #[arg(short, long)]
+    input: PathBuf,
+}
+
 fn main() {
-    let input = fs::read_to_string("./input.xml").unwrap();
+    let cli = Cli::parse();
+    if !cli.input.exists() {
+        panic!("File does not exist: {}", cli.input.display());
+    }
+    let input = fs::read_to_string(&cli.input).unwrap();
     let parsed = quick_xml::de::from_str::<CassyLab>(&input).unwrap();
     let output = serde_json::to_string(&parsed).unwrap();
-    fs::write("./output.json", output).unwrap();
+    let json_file_name = cli
+        .input
+        .parent()
+        .unwrap()
+        .join(cli.input.file_stem().unwrap())
+        .with_extension("json");
+    fs::write(json_file_name, output).unwrap();
 
     let mut files: Vec<CSVFile> = vec![];
 
@@ -47,7 +65,12 @@ fn main() {
     });
     //dbg!(&files);
     for (index, file) in files.iter().enumerate() {
-        fs::write(format!("{}.csv", index), String::from(file)).unwrap();
+        let csv_file_name = cli.input.parent().unwrap().join(format!(
+            "{}_{}.csv",
+            cli.input.file_stem().unwrap().to_string_lossy(),
+            index
+        ));
+        fs::write(csv_file_name, String::from(file)).unwrap();
     }
 }
 
