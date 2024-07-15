@@ -17,6 +17,8 @@ pub fn convert(input: String, input_path: PathBuf) {
     parsed.allchannels.channels.iter().for_each(|channels| {
         channels
             .channel
+            .as_ref()
+            .unwrap()
             .iter()
             .enumerate()
             .for_each(|(index, channel)| {
@@ -60,10 +62,10 @@ pub fn convert(input: String, input_path: PathBuf) {
     }
 }
 
-#[derive(Serialize, Debug)]
-struct CSVFile {
-    header: Vec<String>,
-    columns: Vec<Vec<f64>>,
+#[derive(Serialize, Debug, Default)]
+pub struct CSVFile {
+    pub header: Vec<String>,
+    pub columns: Vec<Vec<f64>>,
 }
 
 impl From<&CSVFile> for String {
@@ -110,21 +112,21 @@ struct AllChannels {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Channels {
-    channel: Vec<Channel>,
+pub struct Channels {
+    pub channel: Option<Vec<Channel>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Channel {
-    quantity: String,
+pub struct Channel {
+    pub quantity: String,
     symbol: String,
     unit: Option<String>,
     range: Range,
-    values: Values,
+    pub values: Values,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Range {
+pub struct Range {
     #[serde(rename = "@min")]
     min: f64,
     #[serde(rename = "@max")]
@@ -132,14 +134,14 @@ struct Range {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Values {
+pub struct Values {
     #[serde(rename = "@count")]
     count: u32,
-    value: Option<Vec<Value>>,
+    pub value: Option<Vec<Value>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Value {
+pub struct Value {
     #[serde(rename = "$value")]
-    value: f64,
+    pub value: f64,
 }
